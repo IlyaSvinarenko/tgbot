@@ -1,0 +1,46 @@
+name: Deploy to Server #имя воркфлоу
+
+on:
+  push:
+    branches:
+      - main #этот воркфлоу срабатывает при изменениях в ветке main
+
+  workflow_dispatch: # и срабатывает при ручном запуске
+
+jobs:
+  deploy:
+    runs-on: ubuntu-20.04
+    if: github.event.pull_request.merged == true || github.event_name != 'pull_request'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ilyasvinarenko
+          password: ${{ secrets.DEPLOY_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/ilyasvinarenko/tgbot:${{ github.sha }}
+
+      - name: Deploy to server
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SERVER_LOGIN: ${{ secrets.SERVER_LOGIN }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          echo "$SSH_PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          mkdir -p ~/.ssh
+          ssh-keyscan $SERVER_IP >> ~/.ssh/known_hosts
+          ssh -i private_key.pem $SERVER_LOGIN@$SERVER_IP "sudo docker stop tgbot || echo && sudo docker rm tgbot || echo && sudo docker login ghcr.io -u ilyasvinarenko -p ${{ secrets.DEPLOY_TOKEN }} && sudo docker run -d --network=tgbotnet --name tgbot -e LOG_LEVEL=${{ secrets.LOG_LEVEL }} -e Son_of_Ilya_bot_id=${{ secrets.SON_OF_ILYA_BOT_ID }} -e Son_of_Ilya_bot=${{ secrets.SON_OF_ILYA_BOT }} ghcr.io/ilyasvinarenko/tgbot:${{ github.sha }}"
+          rm -f private_key.pem
