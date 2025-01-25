@@ -10,7 +10,6 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from create_bot import bot
 
-
 log_level = os.getenv("LOG_LEVEL", "INFO")
 logging.basicConfig(level=log_level, format='%(asctime)s %(levelname)s %(message)s')
 start_router = Router()
