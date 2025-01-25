@@ -91,6 +91,7 @@ class UsersTable:
         self.cursor.execute(f"DELETE FROM users WHERE user_id = {user_id}")
         return self.connect.commit()
 
+
 users_table = UsersTable()
 
 users_table.create_table_users()
