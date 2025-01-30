@@ -4,8 +4,7 @@ import time
 log_level = os.getenv("LOG_LEVEL", "INFO")
 logging.basicConfig(level=log_level, format='%(asctime)s %(levelname)s %(message)s')
 
-bot_id: int = os.environ.get(
-    'Son_of_Ilya_bot_id')  # Нужно для того чтобы бот сам себя случайно не добавлял в таблицу users
+bot_id: int = os.environ.get('Son_of_Ilya_bot_id')  # Нужно для того чтобы бот сам себя случайно не добавлял в таблицу users
 
 '''Класс для работы с базой данных'''
 
