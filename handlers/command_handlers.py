@@ -4,6 +4,8 @@ import os
 from aiogram import Router, F
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, CallbackQuery, PollAnswer
+
+import menus
 from db_handler import users_table
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -45,25 +47,23 @@ temp_selection = {}
 # Команда /create_party
 @start_router.message(Command("create_party"))
 async def create_party(message: Message):
-    users_from_db = users_table.get_users()
-    temp_selection[message.from_user.id] = set()  # Инициализация выбора для пользователя
-    users = []
-    for user in users_from_db:
-        user_id, user_name, user_first_name = user[0], user[2], user[4]
-        users.append([user_id, user_name, user_first_name])
+    if message.chat.type != "private":
+        users_from_db = users_table.get_users_in_chat(message.chat.id)
+        temp_selection[message.from_user.id] = set()
+        users = []
+        for user in users_from_db:
+            user_id, user_name, user_first_name = user[0], user[2], user[4]
+            users.append([user_id, user_name, user_first_name])
+    else:
+        users_from_db = users_table.get_users()
+        temp_selection[message.from_user.id] = set()  # Инициализация выбора для пользователя
+        users = []
+        for user in users_from_db:
+            user_id, user_name, user_first_name = user[0], user[2], user[4]
+            users.append([user_id, user_name, user_first_name])
     # Создаем кнопки
-    builder = InlineKeyboardBuilder()
-    for i in users:
-        builder.row(
-            InlineKeyboardButton(
-                text=f'{i[1]} / {i[2]}',
-                callback_data=f'party {i[0]} {i[1]}'
-            )
-        )
-    builder.row(InlineKeyboardButton(text='Закончить выбор', callback_data='party finish_selection'))
-    builder = builder.as_markup()
-
-    await message.answer("Выберите пользователей для группы (нажмите на ник):", reply_markup=builder)
+    menu = menus.create_party_users_menu(users)
+    await message.answer("Выберите пользователей для группы (нажмите на ник):", reply_markup=menu)
 
 
 # Обработка нажатий на кнопки выбора
