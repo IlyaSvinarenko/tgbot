@@ -4,6 +4,6 @@ COPY requirements.txt requirements.txt
 RUN pip3 install --upgrade setuptools
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY * /app/
+COPY . .
 
-ENTRYPOINT ["python", "/app/aiogram_run.py"]
+ENTRYPOINT ["python", "/aiogram_run.py"]
