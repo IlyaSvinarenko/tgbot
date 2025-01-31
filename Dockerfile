@@ -6,4 +6,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-ENTRYPOINT ["python", "/aiogram_run.py"]
+ENTRYPOINT ["python", "aiogram_run.py"]
