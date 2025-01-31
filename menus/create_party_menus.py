@@ -2,7 +2,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 
-async def create_party_users_menu(users):
+def create_party_users_menu(users):
     builder = InlineKeyboardBuilder()
     for i in users:
         builder.row(
