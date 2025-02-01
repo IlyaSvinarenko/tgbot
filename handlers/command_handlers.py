@@ -72,27 +72,16 @@ async def select_user(callback_query: CallbackQuery):
     if callback_query.data.split()[1] == "finish_selection":
         user_set = temp_selection.get(callback_query.from_user.id, set())
         initiator_id = callback_query.from_user.id
-        if user_set:
+        if not user_set or len(user_set) == 0:
+            await bot.send_message(callback_query.message.chat.id, "Ты никого не выбрал")
+        else:
             for user_id in user_set:
-                builder = InlineKeyboardBuilder()
-                builder.row(
-                    InlineKeyboardButton(
-                        text=f'Гог',
-                        callback_data=f'answer 1 {initiator_id}'
-                    )
-                )
-                builder.row(InlineKeyboardButton(text='Не Гог', callback_data=f'answer 0 {initiator_id}'))
-                builder = builder.as_markup()
+                agreement_menu = menus.create_agreement_menu(initiator_id=initiator_id, user_id=user_id)
+
                 await bot.send_message(chat_id=user_id,
                                        text=f"Тебя призывает в доту {callback_query.from_user.username}",
-                                       reply_markup=builder)
-                # await bot.send_poll(chat_id=user_id, question='Гог?',
-                #                     options=['Гог', 'Не Гог'],
-                #                     type='quiz',
-                #                     correct_option_id=0,
-                #                     is_anonymous=False)
-                # await bot.send_message(user_id, f"@{callback_query.from_user.username} Призывает тебя в доту")
-        del temp_selection[callback_query.from_user.id]
+                                       reply_markup=agreement_menu)
+            del temp_selection[callback_query.from_user.id]
     else:
         user_id = int(callback_query.data.split()[1])
         user_name = callback_query.data.split()[2]
