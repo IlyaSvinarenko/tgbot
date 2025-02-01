@@ -45,7 +45,7 @@ def create_timer_menu():
     menu = builder.as_markup()
     return menu
 
-def create_agreement_menu(initiator_id, user_id):
+def create_agreement_menu(initiator_id):
     builder = InlineKeyboardBuilder()
     builder.row(
         InlineKeyboardButton(
@@ -54,4 +54,5 @@ def create_agreement_menu(initiator_id, user_id):
         )
     )
     builder.row(InlineKeyboardButton(text='Не Гог', callback_data=f'answer 0 {initiator_id}'))
-    builder = builder.as_markup()
+    menu = builder.as_markup()
+    return menu
