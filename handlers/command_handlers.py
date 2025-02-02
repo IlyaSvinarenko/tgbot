@@ -3,7 +3,7 @@ import os
 
 from aiogram import Router, F
 from aiogram.filters import CommandStart, Command
-from aiogram.types import Message, CallbackQuery, PollAnswer
+from aiogram.types import Message, CallbackQuery, PollAnswer, InputFile
 
 import menus
 from db_handler import users_table
@@ -11,7 +11,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from create_bot import bot
-
+from you_tube_download_videos import you_tube_download_video
 log_level = os.getenv("LOG_LEVEL", "INFO")
 logging.basicConfig(level=log_level, format='%(asctime)s %(levelname)s %(message)s')
 start_router = Router()
@@ -30,6 +30,20 @@ async def cmd_start(message: Message):
         users_table.add_user(user_id, user_name, user_first_name, chat_id)
         await message.answer(f"@{user_name} \n Добро пожаловать на борт!")
 
+
+@start_router.message(lambda message: 'youtube.com' in message.text)  # Проверяем, что это ссылка с YouTube
+async def handle_youtube_link(message: Message):
+    video_url = str(message.text.strip())  # Получаем ссылку на видео
+    chat_id = message.chat.id
+
+    # Скачиваем видео и получаем InputFile
+    video_input_file = you_tube_download_video.download_video(video_url)
+
+    # Отправляем видео
+    if isinstance(video_input_file, InputFile):
+        await bot.send_video(chat_id, video_input_file)
+    else:
+        await bot.send_message(chat_id, "Sorry, there was an error downloading the video.")
 
 # @start_router.message(Command("party"))
 # async def all_message_handler(message: Message):
